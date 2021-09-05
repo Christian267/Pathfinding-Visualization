@@ -2,18 +2,19 @@
   margin-top: -3px;
   margin-bottom: -2px;
   margin-right: -1px;
-  border: 1px solid rgb(100, 100, 100);
-  width: 30px;
-  height: 30px;
+  border: 1px solid rgb(71, 71, 71);
+  background-color: white;
+  width: 25px;
+  height: 25px;
   display: inline-block;
 }
 
 .node-finish {
-  background-color: red;
+  background-color: rgb(255, 67, 67);
 }
 
 .node-start {
-  background-color: rgb(0, 201, 0);
+  background-color: rgb(39, 255, 111);
 }
 
 .node-visited {
@@ -30,22 +31,22 @@
 @keyframes visitedAnimation {
   0% {
     transform: scale(0.75);
-    background-color: rgba(0, 0, 66, 0.75);
+    background-color: rgb(38, 38, 107);
     border-radius: 100%;
   }
 
   50% {
-    background-color: rgba(17, 104, 217, 0.75);
+    background-color: rgba(17, 104, 217, 1);
   }
 
   75% {
     transform: scale(1);
-    background-color: rgba(0, 217, 159, 0.75);
+    background-color: rgba(0, 217, 159, 1);
   }
 
   100% {
     transform: scale(1);
-    background-color: rgba(0, 190, 218, 0.75);
+    background-color: rgb(50, 197, 219);
   }
 }
 
@@ -67,12 +68,12 @@
 @keyframes shortestPath {
   0% {
     transform: scale(0.6);
-    background-color: rgb(255, 254, 106);
+    background-color: rgb(255, 198, 74);
   }
 
   50% {
     transform: scale(1.2);
-    background-color: rgb(255, 254, 106);
+    background-color: rgb(255, 240, 96);
   }
 
   100% {

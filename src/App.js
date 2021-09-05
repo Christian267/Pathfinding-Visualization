@@ -4,9 +4,10 @@ import MazeSolvingVisualizer from "./MazeSolvingVisualizer/MazeSolvingVisualizer
 
 function App() {
   return (
-    <div className="App">
+    <div className="App" id="visualizer">
       <MazeSolvingVisualizer />
     </div>
+
   );
 }
 

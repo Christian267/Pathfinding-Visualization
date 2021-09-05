@@ -17,9 +17,11 @@ export default class MazeSolvingVisualizer extends Component {
   constructor(props) {
     super(props);
     this.ref = React.createRef();
+    this.clearGridButtonRef= React.createRef();
     this.state = {
       grid: [],
       mouseIsPressed: false,
+      disableButtonsWhileAnimating: false,
     };
     this.visualizeDijkstra = this.visualizeDijkstra.bind(this);
     this.clearGrid = this.clearGrid.bind(this);
@@ -74,6 +76,9 @@ export default class MazeSolvingVisualizer extends Component {
         ).className = `node node-shortest-path`;
       }, 50 * i);
     }
+    setTimeout(() => {
+      this.setState({disableButtonsWhileAnimating: false})
+    }, 50 * nodesInShortestPathOrder.length);
   }
 
   visualizeDijkstra() {
@@ -85,8 +90,10 @@ export default class MazeSolvingVisualizer extends Component {
     const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
     const visitedNodesInOrder = dijkstra(grid, startNode, finishNode);
     const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
+    this.setState({disableButtonsWhileAnimating: true});
     this.animateDijkstra(visitedNodesInOrder, nodesInShortestPathOrder);
   }
+
 
   //saveWall() is used in visualizeDijkstra() to maintain walls when repeating animation
   saveWalls() {
@@ -149,11 +156,19 @@ export default class MazeSolvingVisualizer extends Component {
     const { grid, mouseIsPressed } = this.state;
 
     return (
-      <>
-        <button onClick={this.visualizeDijkstra}>
-          Visual Dijkstra's Algorithm
-        </button>
-        <button onClick={this.clearGrid}>Clear Grid</button>
+      <><div className="buttons">
+          <button onClick={this.visualizeDijkstra} disabled={this.state.disableButtonsWhileAnimating}>Visual Algorithm</button>
+          <button onClick={this.clearGrid} disabled={this.state.disableButtonsWhileAnimating}>Clear Grid</button>
+          <div className='dropdown'>
+            <button id="algorithmMenu" className="algorithmMenu">Choose Algorithm</button>
+            <div className="dropdownContent">
+              <a value="">Dijkstra</a>
+              <a value="">A Star</a>
+              <a value="">Breadth First</a>
+              <a value="">Depth First</a>
+            </div>
+          </div>
+        </div>
         <div className="grid">
           {grid.map((row, rowIdx) => {
             return (

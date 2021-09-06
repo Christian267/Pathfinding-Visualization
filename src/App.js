@@ -1,11 +1,11 @@
 import React from "react";
 import "./App.css";
-import MazeSolvingVisualizer from "./MazeSolvingVisualizer/MazeSolvingVisualizer";
+import PathfindingVisualizer from "./MazeSolvingVisualizer/PathfindingVisualizer";
 
 function App() {
   return (
     <div className="App" id="visualizer">
-      <MazeSolvingVisualizer />
+      <PathfindingVisualizer />
     </div>
 
   );

@@ -1,0 +1,162 @@
+.node {
+  margin-top: -3px;
+  margin-bottom: -2px;
+  margin-right: -1px;
+  border: 1px solid rgb(165, 165, 165);
+  background-color: white;
+  width: 25px;
+  height: 25px;
+  display: inline-block;
+  z-index: 10;
+}
+
+.node-finish {
+  background-color: rgb(255, 67, 67);
+}
+
+.node-start {
+  background-color: rgb(39, 255, 111);
+}
+
+.node-visited {
+  animation-name: visitedAnimation;
+  animation-duration: .75s;
+  animation-timing-function: ease-out;
+  animation-delay: 0;
+  animation-direction: alternate;
+  animation-iteration-count: 1;
+  animation-fill-mode: forwards;
+  animation-play-state: running;
+  z-index: 1;
+}
+
+.node-visited-no-animation {
+  background-color: rgb(50, 197, 219);
+  border: 1px solid rgba(255, 255, 255, 0.438);
+  z-index: 1;
+}
+
+@keyframes visitedAnimation {
+  0% {
+    transform: scale(0.75);
+    background-color: rgb(38, 38, 107);
+    border-radius: 100%;
+  }
+
+  50% {
+    background-color: rgba(17, 104, 217, 1);
+  }
+
+  75% {
+    transform: scale(1);
+    background-color: rgba(0, 217, 159, 1);
+  }
+
+  100% {
+    transform: scale(1);
+    background-color: rgb(50, 197, 219);
+    border: 1px solid rgba(255, 255, 255, 0.438);
+    z-index: 1;
+}
+}
+
+.node-wall {
+  background-color: rgb(0, 0, 0);
+  border: 1px solid black;  
+  animation-name: wallAnimation;
+  animation-duration: .25s;
+  animation-timing-function: ease-out;
+  animation-delay: .1s;
+  animation-direction: alternate;
+  animation-iteration-count: 1;
+  animation-fill-mode: forwards;
+  animation-play-state: running;
+}
+
+@keyframes wallAnimation {
+  0% {
+    transform: scale(0.5);
+  }
+
+  100% {
+    transform: scale(1);
+
+  }
+}
+
+
+.node-shortest-path {
+  animation-name: shortestPath;
+  animation-duration: .5s;
+  animation-timing-function: ease-out;
+  animation-delay: 0;
+  animation-direction: alternate;
+  animation-iteration-count: 1;
+  animation-fill-mode: forwards;
+  animation-play-state: running;
+}
+
+.node-shortest-path-no-animation {
+  background-color: rgba(255, 255, 106, 0.966);
+  border: 1px solid rgb(255, 255, 106);
+}
+
+@keyframes shortestPath {
+  0% {
+    transform: scale(0.6);
+    background-color: rgb(255, 146, 74);
+  }
+
+  50% {
+    transform: scale(1.2);
+    background-color: rgb(255, 240, 96);
+  }
+
+  100% {
+    transform: scale(1);
+    background-color: rgba(255, 255, 106, 0.966);
+    border: 1px solid rgb(255, 255, 106);
+  }
+}
+
+.node-weight-2 {
+  background-image: linear-gradient(
+    45deg,
+    rgba(0,0,0,0.5) 0%,
+    transparent 0%,
+    transparent 50%,
+    rgba(0,0,0,0.5) 0%,
+    rgba(0,0,0,0.5) 55%,
+    transparent 0%,
+    transparent 
+  );
+  background-size:5px 5px;
+}
+
+.node-weight-3 {
+  background-image: linear-gradient(
+    45deg,
+    rgba(0,0,0,0.5) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(0,0,0,0.5) 50%,
+    rgba(0,0,0,0.5) 75%,
+    transparent 75%,
+    transparent 
+  );
+  background-size:5px 5px;
+}
+
+.node-weight-4 {
+  background-image: linear-gradient(
+    45deg,
+    rgba(0,0,0,0.5) 25%,
+    transparent 25%,
+    transparent 0%,
+    rgba(0,0,0,0.5) 50%,
+    rgba(0,0,0,0.5) 75%,
+    transparent 75%,
+    transparent 
+  );
+  background-size:5px 5px;
+}

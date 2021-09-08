@@ -41,6 +41,7 @@
     border-bottom: 2px solid #d6bdff;
     border-top: 2px solid rgb(78, 78, 78);
     background: black;
+    z-index: 1;
   } 
   
   .dropdown:hover .dropdownContent {

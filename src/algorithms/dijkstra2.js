@@ -5,7 +5,7 @@ export function dijkstra(grid, startNode, finishNode) {
     startNode.distance = 1000;
     const visitedNodesInOrder = [];
     const neighborsAlreadyInQueue = [];
-    queue.push([startNode, 10]);
+    queue.push([startNode, startNode.distance]);
     while (!queue.isEmpty()) {
         const currentNode = queue.pop()[0];
         currentNode.isVisited = true;

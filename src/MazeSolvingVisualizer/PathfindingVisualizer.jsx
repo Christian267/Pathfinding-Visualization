@@ -26,7 +26,7 @@ export default class PathFindingVisualizer extends Component {
     this.state = {
       grid: [],
       mouseIsPressed: false,
-      disableButtonsWhileAnimating: false,
+      disableButtonsAndGridWhileAnimating: false,
       holdingEndNode: false,
       startNode: {
         row: 10,
@@ -45,6 +45,7 @@ export default class PathFindingVisualizer extends Component {
     };
     this.visualizeDijkstra = this.visualizeDijkstra.bind(this);
     this.clearGrid = this.clearGrid.bind(this);
+    this.clearVisitedNodes = this.clearVisitedNodes.bind(this);
     this.saveWallsAndWeights = this.saveWallsAndWeights.bind(this);
     this.placeWallsAndWeights = this.placeWallsAndWeights.bind(this);
     this.handleChooseAlgorithm = this.handleChooseAlgorithm.bind(this);
@@ -71,6 +72,8 @@ export default class PathFindingVisualizer extends Component {
   }
 
   handleMouseDown(row, col) {
+    const gridIsDisabled = this.state.disableButtonsAndGridWhileAnimating;
+    if (gridIsDisabled) return;
     const startNode = this.state.startNode;
     const finishNode = this.state.finishNode;
     if (row === startNode.row && col === startNode.col) {
@@ -102,14 +105,18 @@ export default class PathFindingVisualizer extends Component {
       }
   }
   handleMouseEnter(row, col) {
+    const { grid } = this.state;
+    const gridIsDisabled = this.state.disableButtonsAndGridWhileAnimating;
+    if (gridIsDisabled) return;
     if(this.state.draggingStartNode) {
       const previousStartNode = this.state.startNode;
-      const previousStartNodeElement = document.getElementById(`node-${previousStartNode.row}-${previousStartNode.col}`);
-      const newStartNodeElement = document.getElementById(`node-${row}-${col}`);
-      previousStartNodeElement.className = `node`
-      newStartNodeElement.className = `node node-start`;
+      const previousRow = previousStartNode.row;
+      const previousCol = previousStartNode.col;
+      grid[previousRow][previousCol].isStart = false;
+      grid[row][col].isStart = true;
       setTimeout(() => {
         this.setState({
+          grid: grid,
           startNode:{
             row: row,
             col: col,
@@ -117,17 +124,18 @@ export default class PathFindingVisualizer extends Component {
         })
       }, 0);
       setTimeout(() => {
-        this.visualizeDijkstraNoAnimation()
+        this.visualizeDijkstraNoAnimation();
       }, 0);
     }
     else if (this.state.draggingFinishNode) {
-      const finishNode = this.state.finishNode;
-      const previousFinishNodeElement = document.getElementById(`node-${finishNode.row}-${finishNode.col}`);
-      previousFinishNodeElement.className = `node`
-      const newFinishNodeElement = document.getElementById(`node-${row}-${col}`);
-      newFinishNodeElement.className = `node node-finish`;
+      const previousFinishNode = this.state.finishNode;
+      const previousRow = previousFinishNode.row;
+      const previousCol = previousFinishNode.col;
+      grid[previousRow][previousCol].isFinish = false;
+      grid[row][col].isFinish = true;
       setTimeout(() => {
         this.setState({
+          grid: grid,
           finishNode:{
             row: row,
             col: col,
@@ -135,7 +143,7 @@ export default class PathFindingVisualizer extends Component {
         })
       }, 0);
       setTimeout(() => {
-        this.visualizeDijkstraNoAnimation()
+        this.visualizeDijkstraNoAnimation();
       }, 0);
     }
     else{
@@ -162,8 +170,14 @@ export default class PathFindingVisualizer extends Component {
   }
 
   animateDijkstra(visitedNodesInOrder, nodesInShortestPathOrder) {
-    for (let i = 1; i <= visitedNodesInOrder.length - 1; i++) {
-      if (i === visitedNodesInOrder.length - 1) {
+    const lastVisitedNode = visitedNodesInOrder.at(-1);
+    const finishNode = this.state.finishNode;
+    var loopLength = visitedNodesInOrder.length;
+    if (lastVisitedNode.row === finishNode.row && lastVisitedNode.col === finishNode.col){
+      loopLength--;
+    }
+    for (let i = 1; i <= loopLength; i++) {
+      if (i === loopLength) {
         setTimeout(() => {
           this.animateShortestPath(nodesInShortestPathOrder);
         }, 5 * i);
@@ -180,15 +194,20 @@ export default class PathFindingVisualizer extends Component {
   }
 
   dijkstraNoAnimation(visitedNodesInOrder, nodesInShortestPathOrder) {
-    for (let i = 1; i <= visitedNodesInOrder.length - 1; i++) {
-      if (i === visitedNodesInOrder.length - 1) {
+    const lastVisitedNode = visitedNodesInOrder.at(-1);
+    const finishNode = this.state.finishNode;
+    var loopLength = visitedNodesInOrder.length;
+    if (lastVisitedNode.row === finishNode.row && lastVisitedNode.col === finishNode.col){
+      loopLength--;
+    }
+    for (let i = 1; i <= loopLength; i++) {
+      if (i === loopLength) {
         this.shortestPathNoAnimation(nodesInShortestPathOrder);
         return;
       }
       const node = visitedNodesInOrder[i];
       const currentNodeElement = document.getElementById(`node-${node.row}-${node.col}`);
       const nodeClassName = currentNodeElement.className;
-      console.log(currentNodeElement.className);
       if(nodeClassName === `node node-visited` || 
          nodeClassName === `node node-visited node-weight ${node.weight}` ||
          nodeClassName === `node node-visited-no-animation`||
@@ -213,7 +232,7 @@ export default class PathFindingVisualizer extends Component {
       }, 15 * i);
     }
     setTimeout(() => {
-      this.setState({disableButtonsWhileAnimating: false})
+      this.setState({disableButtonsAndGridWhileAnimating: false})
     }, 15 * nodesInShortestPathOrder.length);
   }
 
@@ -229,11 +248,11 @@ export default class PathFindingVisualizer extends Component {
   }
 
   visualizeDijkstra() {
-    const blockCoordinatesAndType = this.saveWallsAndWeights()
-    setTimeout(() => {
-      this.clearGrid()
-      this.placeWallsAndWeights(blockCoordinatesAndType)
-    }, 0);
+      const blockCoordinatesAndType = this.saveWallsAndWeights();
+      setTimeout(() => {
+        this.clearGrid()
+        this.placeWallsAndWeights(blockCoordinatesAndType)
+      }, 0);
     const { grid } = this.state;
     const startNodeRow = this.state.startNode.row;
     const startNodeCol = this.state.startNode.col;
@@ -241,35 +260,31 @@ export default class PathFindingVisualizer extends Component {
     const finishNodeCol = this.state.finishNode.col;
     const startNode = grid[startNodeRow][startNodeCol]
     const finishNode = grid[finishNodeRow][finishNodeCol];
-    const visitedNodesInOrder = dijkstra(grid, startNode, finishNode);
-    const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
-    this.setState({disableButtonsWhileAnimating: true});
     setTimeout(() => {
+      const visitedNodesInOrder = dijkstra(grid, startNode, finishNode);
+      const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
+      this.setState({disableButtonsAndGridWhileAnimating: true});
       this.animateDijkstra(visitedNodesInOrder, nodesInShortestPathOrder)
     }, 0);
   }
-
-  visualizeDijkstraNoAnimation() {
-    const blockCoordinatesAndType = this.saveWallsAndWeights()
+    
+  visualizeDijkstraNoAnimation(){
     setTimeout(() => {
-      this.clearGrid()
-      this.placeWallsAndWeights(blockCoordinatesAndType)
-    }, 0);
-    const { grid } = this.state;
-    const startNodeRow = this.state.startNode.row;
-    const startNodeCol = this.state.startNode.col;
-    const finishNodeRow = this.state.finishNode.row;
-    const finishNodeCol = this.state.finishNode.col;
-    const startNode = grid[startNodeRow][startNodeCol]
-    const finishNode = grid[finishNodeRow][finishNodeCol];
-    const visitedNodesInOrder = dijkstra(grid, startNode, finishNode);
-    const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
+      this.clearVisitedNodes()
+      }, 0);
     setTimeout(() => {
+      const { grid } = this.state;
+      const startNodeRow = this.state.startNode.row;
+      const startNodeCol = this.state.startNode.col;
+      const finishNodeRow = this.state.finishNode.row;
+      const finishNodeCol = this.state.finishNode.col;
+      const startNode = grid[startNodeRow][startNodeCol];
+      const finishNode = grid[finishNodeRow][finishNodeCol];
+      const visitedNodesInOrder = dijkstra(grid, startNode, finishNode);
+      const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode); // this is where the program freezes
       this.dijkstraNoAnimation(visitedNodesInOrder, nodesInShortestPathOrder)
     }, 0);
   }
-
-
   //saveWall() is used in visualizeDijkstra() to maintain walls when repeating animation
   saveWallsAndWeights() {
     var blockCoordinatesAndType = [];
@@ -308,12 +323,56 @@ export default class PathFindingVisualizer extends Component {
         const weight = blockCoordinatesAndType[i][2];
         grid = getNewGridWithWeightToggled(grid, row, col, weight);
         currentNode.weight = weight;
-        console.log(weight);
         currentNodeElement.className = `node node-weight-${weight}`;
     
       }
     }
     this.setState({grid: grid})
+  }
+
+  clearVisitedNodes(){
+    const { grid } = this.state;
+    for (let row = 0; row < 20; row++) {
+      for (let col = 0; col < 50; col++) {
+        const currentNode = grid[row][col];
+        const currentNodeElement = document.getElementById(
+          `node-${row}-${col}`
+        );
+        const className = currentNodeElement.className;
+        if (currentNode.isVisited){
+          currentNode.isVisited = false;
+          currentNode.previousNode = null;
+        }
+        else {
+          if (className === `node node-finish` &&
+              row !== this.state.finishNode.row &&
+              col !== this.state.finishNode.col){
+                currentNodeElement.className = `node`;
+              }
+          if (className !== `node node-finish` &&
+              className !== `node node-start` &&
+              className !== `node node-wall` &&
+              className !== `node node-weight-${currentNode.weight}` &&
+              className !== `node node-visited node-weight-${currentNode.weight}`) {
+
+              currentNodeElement.className = `node`;
+              }
+        }
+        // if (className !== `node node-visited` &&
+        //     className !== `node node-visited-no-animation` &&
+        //     className !== `node node-shortest-path` &&
+        //     className !== `node node-shortest-path-no-animation` &&
+        //     className !== `node node-start` &&
+        //     className !== `node node-finish` &&
+        //     className !== `node node-wall` &&
+        //     className !== `node node-weight-${currentNode.weight}`) {
+        //   currentNodeElement.className = `node`;
+        // }
+      }
+    }
+    this.setState({
+      grid: grid,
+    });
   }
 
   clearGrid() {
@@ -335,9 +394,9 @@ export default class PathFindingVisualizer extends Component {
       }
     }
 
-    this.setState((state) => ({
+    this.setState({
       grid: grid,
-    }));
+    });
   }
 
   createNode = (col, row) => {
@@ -374,8 +433,8 @@ export default class PathFindingVisualizer extends Component {
     const defaultDropdownTitles = ["Choose Algorithm", "Block Type"]
     return (
       <><div className="buttons">
-          <button onClick={this.visualizeDijkstra} disabled={this.state.disableButtonsWhileAnimating}>Visual Algorithm</button>
-          <button onClick={this.clearGrid} disabled={this.state.disableButtonsWhileAnimating}>Clear Grid</button>
+          <button onClick={this.visualizeDijkstra} disabled={this.state.disableButtonsAndGridWhileAnimating}>Visual Algorithm</button>
+          <button onClick={this.clearGrid} disabled={this.state.disableButtonsAndGridWhileAnimating}>Clear Grid</button>
           <Dropdown 
             key={1}
             handler={this.handleChooseAlgorithm} 

@@ -1,14 +1,15 @@
 1. X Update the visuals of the project (css/html)
 2. X Fix with the bug where animation keeps playing when clearGrid() is called
 3. Add new algorithms to visualize (A star, breadth first, depth first etc)
-4. Add placeable weights into the grid
-5. Look into behavior of grid when no path to finishNode is avaiable. It doesn't break anything but looks a little odd.
+4. X Add placeable weights into the grid
+5. X Look into behavior of grid when no path to finishNode is avaiable. It doesn't break anything but looks a little odd.
 6. X Fix bug (FIXED BUT IDK WHY. PLACED clearGrid() and placeWalls() IN A SETTIMEOUT BLOCK IDK WHY IT WORKS)
     > Visualize algorithm with walls in place
     > Place new wall after visualization is complete
     > New walls are ignored by the subsequent visualization
     So far found that
     # Putting a 1s delay on placeWalls in the visualizeDijkstra() method  
-
+7. Make start and end nodes draggable
+8. Automatically re-render pathfinding when start and end nodes are dragged
 
 

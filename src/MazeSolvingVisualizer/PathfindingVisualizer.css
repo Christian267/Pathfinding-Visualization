@@ -4,7 +4,7 @@
   flex: 6;
   border: 3px #bdfbff solid;
   background-color: white;
-  overflow:hidden;
+  overflow: hidden;
 }
 
 .buttons {
@@ -52,5 +52,6 @@
 .buttons button:disabled {
   border: 2px solid #919191;
   color: #919191;
+  background-color: black;
   cursor: default;
 }

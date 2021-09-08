@@ -1,11 +1,23 @@
 import React, { Component } from "react";
-import Node from "./Node/Node";
+import Node from "../components/Node/Node";
 import {
   dijkstra,
   getNodesInShortestPathOrder,
-} from "../algorithms/dijkstra";
-import Dropdown from "../components/Dropdown"
+} from "../algorithms/dijkstra2";
+import Dropdown from "../components/Dropdown/Dropdown.jsx"
 import "./PathfindingVisualizer.css";
+
+const TEMPORARY_NODE = {
+  col: -1,
+  row: -1,
+  isStart: false,
+  isFinish: false,
+  distance: Infinity,
+  weight: 1,
+  isVisited: false,
+  isWall: false,
+  previousNode: null,
+};
 
 export default class PathFindingVisualizer extends Component {
   constructor(props) {
@@ -24,12 +36,19 @@ export default class PathFindingVisualizer extends Component {
         row: 10,
         col: 35
       },
-      blockTypeToBePlaced: "weight"
+      blockTypeToBePlaced: "Wall",
+      algorithm: "Dijkstra",
+      draggingStartNode: false,
+      draggingFinishNode: false,
+      tempNode: TEMPORARY_NODE,
+      tempNodeClassName: "",
     };
     this.visualizeDijkstra = this.visualizeDijkstra.bind(this);
     this.clearGrid = this.clearGrid.bind(this);
-    this.saveWalls = this.saveWalls.bind(this);
-    this.placeWalls = this.placeWalls.bind(this);
+    this.saveWallsAndWeights = this.saveWallsAndWeights.bind(this);
+    this.placeWallsAndWeights = this.placeWallsAndWeights.bind(this);
+    this.handleChooseAlgorithm = this.handleChooseAlgorithm.bind(this);
+    this.handleChooseBlockType = this.handleChooseBlockType.bind(this);
   }
 
   componentDidMount() {
@@ -39,36 +58,110 @@ export default class PathFindingVisualizer extends Component {
     }));
   }
 
+  handleChooseAlgorithm(algorithm) {
+    this.setState({
+      algorithm: algorithm,
+    });
+  }
+
+  handleChooseBlockType(blockType) {
+    this.setState ({
+      blockTypeToBePlaced: blockType,
+    });
+  }
+
   handleMouseDown(row, col) {
-    const blockType = this.state.blockTypeToBePlaced
-    if (blockType === "wall"){
-      const newGrid = getNewGridWithWallToggled(this.state.grid, row, col);
-      this.setState({ grid: newGrid, mouseIsPressed: true });    
+    const startNode = this.state.startNode;
+    const finishNode = this.state.finishNode;
+    if (row === startNode.row && col === startNode.col) {
+      this.setState({
+        draggingStartNode: true,
+        mouseIsPressed: true,
+      });
     }
-    else if (blockType === "weight") {
-      const newGrid = getNewGridWithWeightToggled(this.state.grid, row, col);
-      this.setState({ grid: newGrid });
+    else if (row === finishNode.row && col === finishNode.col){
+      this.setState({
+        draggingFinishNode: true,
+        mouseIsPressed: true,
+      });
+    }
+    else {
+      const blockType = this.state.blockTypeToBePlaced
+      if (blockType === "Wall"){
+        const newGrid = getNewGridWithWallToggled(this.state.grid, row, col);
+        this.setState({ 
+          grid: newGrid, 
+          mouseIsPressed: true });    
+      }
+      else if (blockType === "Weight") {
+        const newGrid = getNewGridWithWeightToggled(this.state.grid, row, col, 0);
+        this.setState({ 
+          grid: newGrid, 
+          mouseIsPressed: true });
+        }
       }
   }
   handleMouseEnter(row, col) {
-    if (!this.state.mouseIsPressed) return;
-    const blockType = this.state.blockTypeToBePlaced
-    if (blockType === "wall"){
-      const newGrid = getNewGridWithWallToggled(this.state.grid, row, col);
-      this.setState({ grid: newGrid });
+    if(this.state.draggingStartNode) {
+      const previousStartNode = this.state.startNode;
+      const previousStartNodeElement = document.getElementById(`node-${previousStartNode.row}-${previousStartNode.col}`);
+      const newStartNodeElement = document.getElementById(`node-${row}-${col}`);
+      previousStartNodeElement.className = `node`
+      newStartNodeElement.className = `node node-start`;
+      setTimeout(() => {
+        this.setState({
+          startNode:{
+            row: row,
+            col: col,
+          },
+        })
+      }, 0);
+      setTimeout(() => {
+        this.visualizeDijkstraNoAnimation()
+      }, 0);
     }
-    else if (blockType === "weight") {
-      const newGrid = getNewGridWithWeightToggled(this.state.grid, row, col);
-      this.setState({ grid: newGrid });
+    else if (this.state.draggingFinishNode) {
+      const finishNode = this.state.finishNode;
+      const previousFinishNodeElement = document.getElementById(`node-${finishNode.row}-${finishNode.col}`);
+      previousFinishNodeElement.className = `node`
+      const newFinishNodeElement = document.getElementById(`node-${row}-${col}`);
+      newFinishNodeElement.className = `node node-finish`;
+      setTimeout(() => {
+        this.setState({
+          finishNode:{
+            row: row,
+            col: col,
+          },
+        })
+      }, 0);
+      setTimeout(() => {
+        this.visualizeDijkstraNoAnimation()
+      }, 0);
+    }
+    else{
+      if (!this.state.mouseIsPressed) return;
+      const blockType = this.state.blockTypeToBePlaced;
+      if (blockType === "Wall"){
+        const newGrid = getNewGridWithWallToggled(this.state.grid, row, col);
+        this.setState({ grid: newGrid,});
+      }
+      else if (blockType === "Weight") {
+        const newGrid = getNewGridWithWeightToggled(this.state.grid, row, col, 0);
+        this.setState({ grid: newGrid,});
+      }
     }
   }
 
   handleMouseUp() {
-    this.setState({ mouseIsPressed: false });
+    this.setState({ 
+      mouseIsPressed: false,
+      draggingStartNode: false,
+      draggingFinishNode: false,
+      tempNode: TEMPORARY_NODE,
+      tempNodeClassName: ""});
   }
 
   animateDijkstra(visitedNodesInOrder, nodesInShortestPathOrder) {
-    const { grid } = this.state;
     for (let i = 1; i <= visitedNodesInOrder.length - 1; i++) {
       if (i === visitedNodesInOrder.length - 1) {
         setTimeout(() => {
@@ -78,12 +171,33 @@ export default class PathFindingVisualizer extends Component {
       }
       setTimeout(() => {
         const node = visitedNodesInOrder[i];
-        const weight = node.weight;
         const currentNodeElement = document.getElementById(`node-${node.row}-${node.col}`);
         currentNodeElement.className = node.weight===1
           ? `node node-visited`
           : `node node-visited node-weight-${node.weight}`;
       }, 5 * i);
+    }
+  }
+
+  dijkstraNoAnimation(visitedNodesInOrder, nodesInShortestPathOrder) {
+    for (let i = 1; i <= visitedNodesInOrder.length - 1; i++) {
+      if (i === visitedNodesInOrder.length - 1) {
+        this.shortestPathNoAnimation(nodesInShortestPathOrder);
+        return;
+      }
+      const node = visitedNodesInOrder[i];
+      const currentNodeElement = document.getElementById(`node-${node.row}-${node.col}`);
+      const nodeClassName = currentNodeElement.className;
+      console.log(currentNodeElement.className);
+      if(nodeClassName === `node node-visited` || 
+         nodeClassName === `node node-visited node-weight ${node.weight}` ||
+         nodeClassName === `node node-visited-no-animation`||
+         nodeClassName === `node node-visited-no-animation node-weight-${node.weight}`) {
+        continue;
+      }
+        currentNodeElement.className = node.weight===1
+        ? `node node-visited-no-animation`
+        : `node node-visited-no-animation node-weight-${node.weight}`;
     }
   }
 
@@ -96,18 +210,29 @@ export default class PathFindingVisualizer extends Component {
         currentNodeElement.className = node.weight===1
           ? `node node-shortest-path`
           : `node node-shortest-path node-weight-${node.weight}`;
-      }, 30 * i);
+      }, 15 * i);
     }
     setTimeout(() => {
       this.setState({disableButtonsWhileAnimating: false})
-    }, 30 * nodesInShortestPathOrder.length);
+    }, 15 * nodesInShortestPathOrder.length);
+  }
+
+  shortestPathNoAnimation(nodesInShortestPathOrder) {
+    for (let i = 1; i <= nodesInShortestPathOrder.length-2; i++) {
+      const node = nodesInShortestPathOrder[i];
+      const currentNodeElement = document.getElementById(
+        `node-${node.row}-${node.col}`);
+      currentNodeElement.className = node.weight===1
+        ? `node node-shortest-path-no-animation`
+        : `node node-shortest-path-no-animation node-weight-${node.weight}`;
+  }
   }
 
   visualizeDijkstra() {
-    const wallCoordinates = this.saveWalls()
+    const blockCoordinatesAndType = this.saveWallsAndWeights()
     setTimeout(() => {
       this.clearGrid()
-      this.placeWalls(wallCoordinates)
+      this.placeWallsAndWeights(blockCoordinatesAndType)
     }, 0);
     const { grid } = this.state;
     const startNodeRow = this.state.startNode.row;
@@ -124,37 +249,71 @@ export default class PathFindingVisualizer extends Component {
     }, 0);
   }
 
+  visualizeDijkstraNoAnimation() {
+    const blockCoordinatesAndType = this.saveWallsAndWeights()
+    setTimeout(() => {
+      this.clearGrid()
+      this.placeWallsAndWeights(blockCoordinatesAndType)
+    }, 0);
+    const { grid } = this.state;
+    const startNodeRow = this.state.startNode.row;
+    const startNodeCol = this.state.startNode.col;
+    const finishNodeRow = this.state.finishNode.row;
+    const finishNodeCol = this.state.finishNode.col;
+    const startNode = grid[startNodeRow][startNodeCol]
+    const finishNode = grid[finishNodeRow][finishNodeCol];
+    const visitedNodesInOrder = dijkstra(grid, startNode, finishNode);
+    const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
+    setTimeout(() => {
+      this.dijkstraNoAnimation(visitedNodesInOrder, nodesInShortestPathOrder)
+    }, 0);
+  }
+
 
   //saveWall() is used in visualizeDijkstra() to maintain walls when repeating animation
-  saveWalls() {
-    var wallCoordinates = [];
+  saveWallsAndWeights() {
+    var blockCoordinatesAndType = [];
     const { grid } = this.state;
-    var count = 0;
     for (let row = 0; row < 20; row++) {
       for (let col = 0; col < 50; col++) {
+        if ((row === this.state.startNode.row && col === this.state.startNode.col) ||
+        (row === this.state.finishNode.row && col === this.state.finishNode.col)){
+            continue;
+            }
         const currentNode = grid[row][col];
         if (currentNode.isWall) {
-          wallCoordinates.push([row, col]);
-
+          blockCoordinatesAndType.push([row, col, 0]);
+        }
+        else if (currentNode.weight > 1){
+          blockCoordinatesAndType.push([row, col, currentNode.weight]);
         }
       }
     }
-    return wallCoordinates;
+    return blockCoordinatesAndType;  //[row, col, isWall]
   }
 
-  placeWalls(wallCoordinates) {
-    const { grid } = this.state;
-    for (let i = 0; i < wallCoordinates.length; i++) {
-      const row = wallCoordinates[i][0];
-      const col = wallCoordinates[i][1];
-      const newGrid = getNewGridWithWallToggled(grid, row, col);
-      this.setState({grid: newGrid});
-      
+  placeWallsAndWeights(blockCoordinatesAndType) {
+    var { grid } = this.state;
+    for (let i = 0; i < blockCoordinatesAndType.length; i++) {
+      const row = blockCoordinatesAndType[i][0];
+      const col = blockCoordinatesAndType[i][1];
       const currentNode = grid[row][col];
-      currentNode.isWall = true; 
       const currentNodeElement = document.getElementById(`node-${row}-${col}`);
-      currentNodeElement.className = `node ${"node-wall"}`;
+      if (blockCoordinatesAndType[i][2] === 0){
+        grid = getNewGridWithWallToggled(grid, row, col);
+        currentNode.isWall = true; 
+        currentNodeElement.className = `node node-wall`;
+      }
+      else {
+        const weight = blockCoordinatesAndType[i][2];
+        grid = getNewGridWithWeightToggled(grid, row, col, weight);
+        currentNode.weight = weight;
+        console.log(weight);
+        currentNodeElement.className = `node node-weight-${weight}`;
+    
+      }
     }
+    this.setState({grid: grid})
   }
 
   clearGrid() {
@@ -207,14 +366,29 @@ export default class PathFindingVisualizer extends Component {
     return grid;
   }
 
+  
   render() {
     const { grid, mouseIsPressed } = this.state;
-
+    const algorithmDropdownList = ["Dijkstra", "A Star", "Breadth First", "Depth First"];
+    const blockDropdownList = ["Wall", "Weight"];
+    const defaultDropdownTitles = ["Choose Algorithm", "Block Type"]
     return (
       <><div className="buttons">
           <button onClick={this.visualizeDijkstra} disabled={this.state.disableButtonsWhileAnimating}>Visual Algorithm</button>
           <button onClick={this.clearGrid} disabled={this.state.disableButtonsWhileAnimating}>Clear Grid</button>
-          <Dropdown></Dropdown>
+          <Dropdown 
+            key={1}
+            handler={this.handleChooseAlgorithm} 
+            listItems={algorithmDropdownList} 
+            defaultTitle={defaultDropdownTitles[0]}
+          />
+          <Dropdown 
+            key={2}
+            handler={this.handleChooseBlockType} 
+            listItems={blockDropdownList} 
+            defaultTitle={defaultDropdownTitles[1]}
+          />
+          <button>{this.state.algorithm}</button>
         </div>
         <div className="grid">
           {grid.map((row, rowIdx) => {
@@ -263,12 +437,15 @@ const getNewGridWithWallToggled = (grid, row, col) => {
   return newGrid;
 };
 
-const getNewGridWithWeightToggled = (grid, row, col) => {
+const getNewGridWithWeightToggled = (grid, row, col, newWeight) => {
   const newGrid = grid.slice();
   const node = newGrid[row][col];
   var weight = node.weight + 1;
-  if (node.weight >= 4){
-    weight = 4;
+  if (node.weight === 4){
+    weight = 1;
+  }
+  else if (newWeight > 0) {
+    weight = newWeight;
   }
   const newNode = {
     ...node,

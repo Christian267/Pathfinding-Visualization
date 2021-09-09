@@ -7,17 +7,8 @@ import {
 import Dropdown from "../components/Dropdown/Dropdown.jsx"
 import "./PathfindingVisualizer.css";
 
-const TEMPORARY_NODE = {
-  col: -1,
-  row: -1,
-  isStart: false,
-  isFinish: false,
-  distance: Infinity,
-  weight: 1,
-  isVisited: false,
-  isWall: false,
-  previousNode: null,
-};
+const NUMROWS = 20;
+const NUMCOLS = 50;
 
 export default class PathFindingVisualizer extends Component {
   constructor(props) {
@@ -40,8 +31,6 @@ export default class PathFindingVisualizer extends Component {
       algorithm: "Dijkstra",
       draggingStartNode: false,
       draggingFinishNode: false,
-      tempNode: TEMPORARY_NODE,
-      tempNodeClassName: "",
     };
     this.visualizeDijkstra = this.visualizeDijkstra.bind(this);
     this.clearGrid = this.clearGrid.bind(this);
@@ -165,8 +154,7 @@ export default class PathFindingVisualizer extends Component {
       mouseIsPressed: false,
       draggingStartNode: false,
       draggingFinishNode: false,
-      tempNode: TEMPORARY_NODE,
-      tempNodeClassName: ""});
+    });
   }
 
   animateDijkstra(visitedNodesInOrder, nodesInShortestPathOrder) {
@@ -180,7 +168,7 @@ export default class PathFindingVisualizer extends Component {
       if (i === loopLength) {
         setTimeout(() => {
           this.animateShortestPath(nodesInShortestPathOrder);
-        }, 5 * i);
+        }, 15 * i);
         return;
       }
       setTimeout(() => {
@@ -189,7 +177,7 @@ export default class PathFindingVisualizer extends Component {
         currentNodeElement.className = node.weight===1
           ? `node node-visited`
           : `node node-visited node-weight-${node.weight}`;
-      }, 5 * i);
+      }, 15 * i);
     }
   }
 
@@ -263,7 +251,7 @@ export default class PathFindingVisualizer extends Component {
     setTimeout(() => {
       const visitedNodesInOrder = dijkstra(grid, startNode, finishNode);
       const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
-      this.setState({disableButtonsAndGridWhileAnimating: true});
+      // this.setState({disableButtonsAndGridWhileAnimating: true});
       this.animateDijkstra(visitedNodesInOrder, nodesInShortestPathOrder)
     }, 0);
   }
@@ -289,8 +277,8 @@ export default class PathFindingVisualizer extends Component {
   saveWallsAndWeights() {
     var blockCoordinatesAndType = [];
     const { grid } = this.state;
-    for (let row = 0; row < 20; row++) {
-      for (let col = 0; col < 50; col++) {
+    for (let row = 0; row < NUMROWS; row++) {
+      for (let col = 0; col < NUMCOLS; col++) {
         if ((row === this.state.startNode.row && col === this.state.startNode.col) ||
         (row === this.state.finishNode.row && col === this.state.finishNode.col)){
             continue;
@@ -332,8 +320,8 @@ export default class PathFindingVisualizer extends Component {
 
   clearVisitedNodes(){
     const { grid } = this.state;
-    for (let row = 0; row < 20; row++) {
-      for (let col = 0; col < 50; col++) {
+    for (let row = 0; row < NUMROWS; row++) {
+      for (let col = 0; col < NUMCOLS; col++) {
         const currentNode = grid[row][col];
         const currentNodeElement = document.getElementById(
           `node-${row}-${col}`
@@ -377,8 +365,8 @@ export default class PathFindingVisualizer extends Component {
 
   clearGrid() {
     const grid = this.getEmptyGrid();
-    for (let row = 0; row < 20; row++) {
-      for (let col = 0; col < 50; col++) {
+    for (let row = 0; row < NUMROWS; row++) {
+      for (let col = 0; col < NUMCOLS; col++) {
         const currentNode = this.createNode(col, row);
         const currentNodeElement = document.getElementById(
           `node-${row}-${col}`
@@ -415,9 +403,9 @@ export default class PathFindingVisualizer extends Component {
 
   getEmptyGrid = () => {
     const grid = [];
-    for (let row = 0; row < 20; row++) {
+    for (let row = 0; row < NUMROWS; row++) {
       const currentRow = [];
-      for (let col = 0; col < 50; col++) {
+      for (let col = 0; col < NUMCOLS; col++) {
         currentRow.push(this.createNode(col, row));
       }
       grid.push(currentRow);

@@ -11,8 +11,8 @@
     # Putting a 1s delay on placeWalls in the visualizeDijkstra() method  
 7. X Make start and end nodes draggable
 8. X Automatically re-render pathfinding when start and end nodes are dragged
-9. BUG; Visualize Algorithm after dragging endpoints incomplete animation.
-10. Make endpoints not able to go into walls
-11. Make start and finish nodes not able to be placed adjacent to each other.
+9. X BUG; Visualize Algorithm after dragging endpoints incomplete animation.
+10. X Make endpoints not able to go into walls
+11. X (Actually just fixed the BUG that made me want to restrict) Make start and finish nodes not able to be placed adjacent to each other.
 12. Make a premade maze button.
 13. drag on empty grid keep grid empty.

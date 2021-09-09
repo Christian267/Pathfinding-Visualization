@@ -31,6 +31,7 @@ export default class PathFindingVisualizer extends Component {
       algorithm: "Dijkstra",
       draggingStartNode: false,
       draggingFinishNode: false,
+      algorithmAlreadyVisualized: false,
     };
     this.visualizeDijkstra = this.visualizeDijkstra.bind(this);
     this.clearGrid = this.clearGrid.bind(this);
@@ -97,7 +98,7 @@ export default class PathFindingVisualizer extends Component {
     const { grid } = this.state;
     const gridIsDisabled = this.state.disableButtonsAndGridWhileAnimating;
     if (gridIsDisabled) return;
-    if(this.state.draggingStartNode) {
+    if(this.state.draggingStartNode && grid[row][col].isWall === false) {
       const previousStartNode = this.state.startNode;
       const previousRow = previousStartNode.row;
       const previousCol = previousStartNode.col;
@@ -113,10 +114,10 @@ export default class PathFindingVisualizer extends Component {
         })
       }, 0);
       setTimeout(() => {
-        this.visualizeDijkstraNoAnimation();
+        if (this.state.algorithmAlreadyVisualized) this.visualizeDijkstraNoAnimation();
       }, 0);
     }
-    else if (this.state.draggingFinishNode) {
+    else if (this.state.draggingFinishNode && grid[row][col].isWall === false) {
       const previousFinishNode = this.state.finishNode;
       const previousRow = previousFinishNode.row;
       const previousCol = previousFinishNode.col;
@@ -132,10 +133,10 @@ export default class PathFindingVisualizer extends Component {
         })
       }, 0);
       setTimeout(() => {
-        this.visualizeDijkstraNoAnimation();
+        if (this.state.algorithmAlreadyVisualized) this.visualizeDijkstraNoAnimation();
       }, 0);
     }
-    else{
+    else if (!this.state.draggingFinishNode && !this.state.draggingStartNode) {
       if (!this.state.mouseIsPressed) return;
       const blockType = this.state.blockTypeToBePlaced;
       if (blockType === "Wall"){
@@ -168,7 +169,7 @@ export default class PathFindingVisualizer extends Component {
       if (i === loopLength) {
         setTimeout(() => {
           this.animateShortestPath(nodesInShortestPathOrder);
-        }, 15 * i);
+        }, 10 * i);
         return;
       }
       setTimeout(() => {
@@ -177,7 +178,7 @@ export default class PathFindingVisualizer extends Component {
         currentNodeElement.className = node.weight===1
           ? `node node-visited`
           : `node node-visited node-weight-${node.weight}`;
-      }, 15 * i);
+      }, 10 * i);
     }
   }
 
@@ -235,11 +236,15 @@ export default class PathFindingVisualizer extends Component {
   }
   }
 
+  /**
+   * Called when the "Visualize Algorithm" button on the UI is clicked.
+   */
   visualizeDijkstra() {
       const blockCoordinatesAndType = this.saveWallsAndWeights();
       setTimeout(() => {
-        this.clearGrid()
-        this.placeWallsAndWeights(blockCoordinatesAndType)
+      this.clearVisitedNodes()
+      this.clearGrid()
+      this.placeWallsAndWeights(blockCoordinatesAndType)
       }, 0);
     const { grid } = this.state;
     const startNodeRow = this.state.startNode.row;
@@ -251,11 +256,18 @@ export default class PathFindingVisualizer extends Component {
     setTimeout(() => {
       const visitedNodesInOrder = dijkstra(grid, startNode, finishNode);
       const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
-      // this.setState({disableButtonsAndGridWhileAnimating: true});
+      this.setState({
+      algorithmAlreadyVisualized: true,
+      disableButtonsAndGridWhileAnimating: true});
       this.animateDijkstra(visitedNodesInOrder, nodesInShortestPathOrder)
     }, 0);
   }
-    
+
+  /**
+   * Called in handleMouseEnter() when the either endpoint is dragged and an algorithm has already been visualized
+   * Utilized when dragging endpoints on the grid to quickly update the pathFinding algorithm 
+   * visualization without re-animating the algorithm
+   */
   visualizeDijkstraNoAnimation(){
     setTimeout(() => {
       this.clearVisitedNodes()
@@ -269,11 +281,15 @@ export default class PathFindingVisualizer extends Component {
       const startNode = grid[startNodeRow][startNodeCol];
       const finishNode = grid[finishNodeRow][finishNodeCol];
       const visitedNodesInOrder = dijkstra(grid, startNode, finishNode);
-      const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode); // this is where the program freezes
+      const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
       this.dijkstraNoAnimation(visitedNodesInOrder, nodesInShortestPathOrder)
     }, 0);
   }
-  //saveWall() is used in visualizeDijkstra() to maintain walls when repeating animation
+
+  /**
+   * Utilized in visualizeDijkstra() to maintain walls when repeating animation
+   * @return {Array[Array[int][int][int]]}
+   */
   saveWallsAndWeights() {
     var blockCoordinatesAndType = [];
     const { grid } = this.state;
@@ -295,6 +311,11 @@ export default class PathFindingVisualizer extends Component {
     return blockCoordinatesAndType;  //[row, col, isWall]
   }
 
+  /**
+   * Utilized in visualeDijkstra() to maintain walls and weights in conjunction with 
+   * saveWallsAndWeights() after clearGrid() is called. 
+   * @param {Array[Array[int][int]][int]} blockCoordinatesAndType 
+   */
   placeWallsAndWeights(blockCoordinatesAndType) {
     var { grid } = this.state;
     for (let i = 0; i < blockCoordinatesAndType.length; i++) {
@@ -318,6 +339,11 @@ export default class PathFindingVisualizer extends Component {
     this.setState({grid: grid})
   }
 
+  /**
+   * Clears only visited nodes that become unvisited when an endpoint is dragged.
+   * Utilized in visualizeDijkstraNoAnimation() for its improved rendering efficiency
+   * over clearGrid()
+   */
   clearVisitedNodes(){
     const { grid } = this.state;
     for (let row = 0; row < NUMROWS; row++) {
@@ -327,9 +353,17 @@ export default class PathFindingVisualizer extends Component {
           `node-${row}-${col}`
         );
         const className = currentNodeElement.className;
+        currentNode.previousNode = null;
+        const startNode = this.state.startNode;
+        const finishNode = this.state.finishNode;
+        if(className === `node node-start` && (row !== startNode.row || col !== startNode.col)){
+          currentNodeElement.className = `node`;
+        }
+        if (row <= 5 && col <= 5){
+          console.log("Node[0-5][0-5].isStart: " + currentNode.isStart);
+        }
         if (currentNode.isVisited){
           currentNode.isVisited = false;
-          currentNode.previousNode = null;
         }
         else {
           if (className === `node node-finish` &&
@@ -337,25 +371,18 @@ export default class PathFindingVisualizer extends Component {
               col !== this.state.finishNode.col){
                 currentNodeElement.className = `node`;
               }
-          if (className !== `node node-finish` &&
-              className !== `node node-start` &&
+          if (className === `node node-visited-no-animation node-weight-${currentNode.weight}`) {
+            currentNodeElement.className = `node node-weight-${currentNode.weight}`;
+          }
+          if (className !== `node node-start` &&
+              className !== `node node-finish` &&
               className !== `node node-wall` &&
               className !== `node node-weight-${currentNode.weight}` &&
-              className !== `node node-visited node-weight-${currentNode.weight}`) {
-
+              className !== `node node-visited node-weight-${currentNode.weight}`&&
+              className !== `node node-visited-no-animation node-weight-${currentNode.weight}`) {
               currentNodeElement.className = `node`;
-              }
-        }
-        // if (className !== `node node-visited` &&
-        //     className !== `node node-visited-no-animation` &&
-        //     className !== `node node-shortest-path` &&
-        //     className !== `node node-shortest-path-no-animation` &&
-        //     className !== `node node-start` &&
-        //     className !== `node node-finish` &&
-        //     className !== `node node-wall` &&
-        //     className !== `node node-weight-${currentNode.weight}`) {
-        //   currentNodeElement.className = `node`;
-        // }
+            }
+          }
       }
     }
     this.setState({
@@ -363,6 +390,17 @@ export default class PathFindingVisualizer extends Component {
     });
   }
 
+  /**
+   * Used in handleMouseEnter(), removes duplicate start/end nodes
+   * that appear when dragging the endpoints to quickly on empty grid.
+     */
+  clearStartAndFinishDuplicates(){
+
+  }
+
+  /**
+   * Used in visualize dijkstra() with animation and Clear Grid button on the UI.
+   */
   clearGrid() {
     const grid = this.getEmptyGrid();
     for (let row = 0; row < NUMROWS; row++) {
@@ -384,9 +422,18 @@ export default class PathFindingVisualizer extends Component {
 
     this.setState({
       grid: grid,
+      algorithmAlreadyVisualized: false,
     });
+
   }
 
+  /**
+   * Utilized to create unaltered Nodes during the creation of the grid in getEmptyGrid() and
+   * during the clearing of the grid in clearGrid().
+   * @param {int} col 
+   * @param {int} row 
+   * @returns {Node}
+   */
   createNode = (col, row) => {
     return {
       col,
@@ -401,6 +448,10 @@ export default class PathFindingVisualizer extends Component {
     };
   }
 
+  /**
+   * Construct a default grid object with unaltered Nodes.
+   * @returns {grid}
+   */
   getEmptyGrid = () => {
     const grid = [];
     for (let row = 0; row < NUMROWS; row++) {
@@ -496,7 +547,6 @@ const getNewGridWithWeightToggled = (grid, row, col, newWeight) => {
   }
   const newNode = {
     ...node,
-    isVisited: false,
     weight: weight,
   };
   newGrid[row][col] = newNode;

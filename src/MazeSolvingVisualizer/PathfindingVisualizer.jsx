@@ -4,11 +4,11 @@ import {
   dijkstra,
   getNodesInShortestPathOrder,
 } from "../algorithms/dijkstra2";
-import Dropdown from "../components/Dropdown/Dropdown.jsx"
+import DropdownMenu from "../components/DropdownMenu/DropdownMenu.jsx"
 import "./PathfindingVisualizer.css";
 
-const NUMROWS = 20;
-const NUMCOLS = 50;
+const NUMROWS = 30;
+const NUMCOLS = 60;
 
 export default class PathFindingVisualizer extends Component {
   constructor(props) {
@@ -20,12 +20,12 @@ export default class PathFindingVisualizer extends Component {
       disableButtonsAndGridWhileAnimating: false,
       holdingEndNode: false,
       startNode: {
-        row: 10,
-        col: 14
+        row: 14,
+        col: 19
       },
       finishNode: {
-        row: 10,
-        col: 35
+        row: 14,
+        col: 40
       },
       blockTypeToBePlaced: "Wall",
       algorithm: "Dijkstra",
@@ -107,6 +107,8 @@ export default class PathFindingVisualizer extends Component {
       const newNodeElement = document.getElementById(`node-${newNode.row}-${newNode.col}`);
       const previousRow = previousStartNode.row;
       const previousCol = previousStartNode.col;
+      const previousNodeElement = document.getElementById(`node-${previousRow}-${previousCol}`);
+
       grid[previousRow][previousCol].isStart = false;
       grid[row][col].isStart = true;
       setTimeout(() => {
@@ -119,7 +121,10 @@ export default class PathFindingVisualizer extends Component {
         })
       }, 0);
       setTimeout(() => {
-        if (this.state.algorithmAlreadyVisualized) this.visualizeDijkstraNoAnimation();
+        if (this.state.algorithmAlreadyVisualized) {
+          previousNodeElement.className = `node node-visited-no-animation`;
+          this.visualizeDijkstraNoAnimation();
+        }
         else this.clearStartAndFinishDuplicates();
         newNodeElement.className = `node node-start`;
         
@@ -144,7 +149,7 @@ export default class PathFindingVisualizer extends Component {
       }, 0);
       setTimeout(() => {
         if (this.state.algorithmAlreadyVisualized) this.visualizeDijkstraNoAnimation();
-        else this.clearStartAndFinishDuplicates();
+        this.clearStartAndFinishDuplicates();
         newNodeElement.className = `node node-finish`
       }, 0);
     }
@@ -368,16 +373,17 @@ export default class PathFindingVisualizer extends Component {
           `node-${row}-${col}`
         );
         const className = currentNodeElement.className;
-        currentNode.previousNode = null;
         const startNode = this.state.startNode;
         const finishNode = this.state.finishNode;
-        if(className === `node node-start` && (row !== startNode.row || col !== startNode.col)){
+        if (className === `node node-start` && (row !== startNode.row || col !== startNode.col)){
           currentNodeElement.className = `node`;
         }
-        if (row <= 5 && col <= 5){
-        }
+
         if (currentNode.isVisited){
           currentNode.isVisited = false;
+          if (currentNode.weight > 1 && !(currentNode.isStart || currentNode.isFinish)){
+            currentNodeElement.className = currentNodeElement.className + `node-weight-${currentNode.weight}`;
+          }
         }
         else {
           if (className === `node node-finish` &&
@@ -418,11 +424,11 @@ export default class PathFindingVisualizer extends Component {
       }
     }
   }
+  
   /**
    * Used in handleMouseEnter(), removes duplicate start/end nodes
    * that appear when dragging the endpoints to quickly on empty grid.
      */
-
   clearStartAndFinishDuplicates(){
     const { grid } = this.state;
     for (let row = 0; row < NUMROWS; row++) {
@@ -520,19 +526,22 @@ export default class PathFindingVisualizer extends Component {
     const defaultDropdownTitles = ["Choose Algorithm", "Block Type"]
     return (
       <><div className="buttons">
-          <button onClick={this.visualizeDijkstra} disabled={this.state.disableButtonsAndGridWhileAnimating}>Visual Algorithm</button>
+          <button onClick={this.visualizeDijkstra} disabled={this.state.disableButtonsAndGridWhileAnimating}>Visualize Algorithm</button>
           <button onClick={this.clearGrid} disabled={this.state.disableButtonsAndGridWhileAnimating}>Clear Grid</button>
-          <Dropdown 
+          <DropdownMenu 
             key={1}
             handler={this.handleChooseAlgorithm} 
             listItems={algorithmDropdownList} 
             defaultTitle={defaultDropdownTitles[0]}
+            extraClassName={"algorithms"}
           />
-          <Dropdown 
+          <DropdownMenu
             key={2}
             handler={this.handleChooseBlockType} 
             listItems={blockDropdownList} 
-            defaultTitle={defaultDropdownTitles[1]}
+            defaultTitle={defaultDropdownTitles[1]}            
+            extraClassName={"blocks"}
+
           />
           <button>{this.state.algorithm}</button>
         </div>

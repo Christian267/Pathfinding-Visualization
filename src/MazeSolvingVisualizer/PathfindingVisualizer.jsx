@@ -94,12 +94,17 @@ export default class PathFindingVisualizer extends Component {
         }
       }
   }
+
   handleMouseEnter(row, col) {
     const { grid } = this.state;
     const gridIsDisabled = this.state.disableButtonsAndGridWhileAnimating;
     if (gridIsDisabled) return;
-    if(this.state.draggingStartNode && grid[row][col].isWall === false) {
+    if(this.state.draggingStartNode && 
+       grid[row][col].isWall === false &&
+       grid[row][col].isFinish === false) {
       const previousStartNode = this.state.startNode;
+      const newNode = grid[row][col];
+      const newNodeElement = document.getElementById(`node-${newNode.row}-${newNode.col}`);
       const previousRow = previousStartNode.row;
       const previousCol = previousStartNode.col;
       grid[previousRow][previousCol].isStart = false;
@@ -115,10 +120,15 @@ export default class PathFindingVisualizer extends Component {
       }, 0);
       setTimeout(() => {
         if (this.state.algorithmAlreadyVisualized) this.visualizeDijkstraNoAnimation();
+        else this.clearStartAndFinishDuplicates();
+        newNodeElement.className = `node node-start`;
+        
       }, 0);
     }
     else if (this.state.draggingFinishNode && grid[row][col].isWall === false) {
       const previousFinishNode = this.state.finishNode;
+      const newNode = grid[row][col];
+      const newNodeElement = document.getElementById(`node-${newNode.row}-${newNode.col}`);
       const previousRow = previousFinishNode.row;
       const previousCol = previousFinishNode.col;
       grid[previousRow][previousCol].isFinish = false;
@@ -134,6 +144,8 @@ export default class PathFindingVisualizer extends Component {
       }, 0);
       setTimeout(() => {
         if (this.state.algorithmAlreadyVisualized) this.visualizeDijkstraNoAnimation();
+        else this.clearStartAndFinishDuplicates();
+        newNodeElement.className = `node node-finish`
       }, 0);
     }
     else if (!this.state.draggingFinishNode && !this.state.draggingStartNode) {
@@ -270,9 +282,11 @@ export default class PathFindingVisualizer extends Component {
    */
   visualizeDijkstraNoAnimation(){
     setTimeout(() => {
-      this.clearVisitedNodes()
+      this.resetNodeProperties();
       }, 0);
-    setTimeout(() => {
+      setTimeout(() => {
+      }, 0);
+      setTimeout(() => {
       const { grid } = this.state;
       const startNodeRow = this.state.startNode.row;
       const startNodeCol = this.state.startNode.col;
@@ -282,7 +296,8 @@ export default class PathFindingVisualizer extends Component {
       const finishNode = grid[finishNodeRow][finishNodeCol];
       const visitedNodesInOrder = dijkstra(grid, startNode, finishNode);
       const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
-      this.dijkstraNoAnimation(visitedNodesInOrder, nodesInShortestPathOrder)
+      this.clearVisitedNodes();
+      this.dijkstraNoAnimation(visitedNodesInOrder, nodesInShortestPathOrder);
     }, 0);
   }
 
@@ -312,7 +327,7 @@ export default class PathFindingVisualizer extends Component {
   }
 
   /**
-   * Utilized in visualeDijkstra() to maintain walls and weights in conjunction with 
+   * Utilized in visualizeDijkstra() to maintain walls and weights in conjunction with 
    * saveWallsAndWeights() after clearGrid() is called. 
    * @param {Array[Array[int][int]][int]} blockCoordinatesAndType 
    */
@@ -360,7 +375,6 @@ export default class PathFindingVisualizer extends Component {
           currentNodeElement.className = `node`;
         }
         if (row <= 5 && col <= 5){
-          console.log("Node[0-5][0-5].isStart: " + currentNode.isStart);
         }
         if (currentNode.isVisited){
           currentNode.isVisited = false;
@@ -391,11 +405,45 @@ export default class PathFindingVisualizer extends Component {
   }
 
   /**
+   * Used in visualizeDijkstraNoAnimation() to allow dijkstra's algorithm to run with the 
+   * new start and end nodes.
+   */
+  resetNodeProperties(){
+    const { grid } = this.state;
+    for (let row = 0; row < NUMROWS; row++) {
+      for (let col = 0; col < NUMCOLS; col++) {
+        const currentNode = grid[row][col];
+        currentNode.isVisited = false;
+        currentNode.previousNode = null;
+      }
+    }
+  }
+  /**
    * Used in handleMouseEnter(), removes duplicate start/end nodes
    * that appear when dragging the endpoints to quickly on empty grid.
      */
-  clearStartAndFinishDuplicates(){
 
+  clearStartAndFinishDuplicates(){
+    const { grid } = this.state;
+    for (let row = 0; row < NUMROWS; row++) {
+      for (let col = 0; col < NUMCOLS; col++) {
+        const currentNode = grid[row][col];
+        const currentNodeElement = document.getElementById(
+          `node-${row}-${col}`
+        );
+        const startNode = this.state.startNode;
+        const finishNode = this.state.finishNode;
+        const className = currentNodeElement.className;
+        if (className === `node node-start` &&
+            (row !== startNode.row || col !== startNode.col )) {
+              currentNodeElement.className = `node`;
+        }
+        if (className === `node node-finish` &&
+        (row !== finishNode.row || col !== finishNode.col )) {
+          currentNodeElement.className = `node`;
+        }
+      }
+    }
   }
 
   /**

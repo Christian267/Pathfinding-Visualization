@@ -44,12 +44,6 @@ function getUnvisitedNeighbors(node, grid) {
     if (col > 0) neighbors.push(grid[row][col - 1]);
     if (col < grid[0].length - 1) neighbors.push(grid[row][col + 1]);
     const viableNeighbors = neighbors.filter((neighbor) => !(neighbor.isVisited || neighbor.isWall));
-    // for (const neighbor of neighbors) {
-    //     console.log("Inside getUnvisitedNeighbors(); neighbors: " + neighbor.isVisited);
-    // }
-    // for (const neighbor of viableNeighbors) {
-    //     console.log("ROW: " + neighbor.row + ", COL: " + neighbor.col);
-    // }
     return viableNeighbors;
 }
 

@@ -98,7 +98,8 @@
 
 .node-shortest-path-no-animation {
   background-color: rgba(255, 255, 106, 0.966);
-  border: 1px solid rgb(255, 255, 106);
+  border: 1px solid rgb(233, 233, 60);
+
 }
 
 @keyframes shortestPath {
@@ -115,7 +116,7 @@
   100% {
     transform: scale(1);
     background-color: rgba(255, 255, 106, 0.966);
-    border: 1px solid rgb(255, 255, 106);
+    border: 1px solid rgb(233, 233, 60);
   }
 }
 

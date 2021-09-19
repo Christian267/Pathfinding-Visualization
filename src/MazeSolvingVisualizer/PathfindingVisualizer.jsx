@@ -191,7 +191,7 @@ export default class PathFindingVisualizer extends Component {
       if (i === loopLength) {
         setTimeout(() => {
           this.animateShortestPath(nodesInShortestPathOrder);
-        }, 10 * i);
+        }, 20 * i);
         return;
       }
       setTimeout(() => {
@@ -200,7 +200,7 @@ export default class PathFindingVisualizer extends Component {
         currentNodeElement.className = node.weight===1
           ? `node node-visited`
           : `node node-visited node-weight-${node.weight}`;
-      }, 10 * i);
+      }, 20 * i);
     }
   }
 
@@ -240,11 +240,11 @@ export default class PathFindingVisualizer extends Component {
         currentNodeElement.className = node.weight===1
           ? `node node-shortest-path`
           : `node node-shortest-path node-weight-${node.weight}`;
-      }, 15 * i);
+      }, 25 * i);
     }
     setTimeout(() => {
       this.setState({disableButtonsAndGridWhileAnimating: false})
-    }, 15 * nodesInShortestPathOrder.length);
+    }, 25 * nodesInShortestPathOrder.length);
   }
 
   shortestPathNoAnimation(nodesInShortestPathOrder) {
@@ -265,6 +265,7 @@ export default class PathFindingVisualizer extends Component {
     const blockCoordinatesAndType = this.saveWallsAndWeights();
     setTimeout(() => {
     this.clearVisitedNodes()
+    this.resetNodeProperties()
     this.clearGrid()
     this.placeWallsAndWeights(blockCoordinatesAndType)
     }, 0);
@@ -387,15 +388,16 @@ export default class PathFindingVisualizer extends Component {
         );
         const className = currentNodeElement.className;
         const startNode = this.state.startNode;
+        var tempClassName = null;
         if (className === `node node-start` && (row !== startNode.row || col !== startNode.col)){
           currentNodeElement.className = `node`;
         }
 
         if (currentNode.isVisited){
           currentNode.isVisited = false;
-          if (currentNode.weight > 1 && !(currentNode.isStart || currentNode.isFinish)){
-            currentNodeElement.className = currentNodeElement.className + `node-weight-${currentNode.weight}`;
-          }
+          // if (currentNode.weight > 1 && !(currentNode.isStart || currentNode.isFinish)) {
+          //   currentNodeElement.className = currentNodeElement.className + `node-weight-${currentNode.weight}`;
+          // }
         }
         else {
           if (className === `node node-finish` &&
@@ -403,16 +405,24 @@ export default class PathFindingVisualizer extends Component {
               col !== this.state.finishNode.col){
                 currentNodeElement.className = `node`;
               }
-          if (className === `node node-visited-no-animation node-weight-${currentNode.weight}`) {
+          if (className === `node node-visited-no-animation node-weight-${currentNode.weight}` ||
+              className === `node node-shortest-path-no-animation node-weight-${currentNode.weight}`) {
             currentNodeElement.className = `node node-weight-${currentNode.weight}`;
           }
+
           if (className !== `node node-start` &&
               className !== `node node-finish` &&
               className !== `node node-wall` &&
+              className !== `node node-shortest-path-no-animation node-weight-${currentNode.weight}` &&
               className !== `node node-weight-${currentNode.weight}` &&
               className !== `node node-visited node-weight-${currentNode.weight}`&&
               className !== `node node-visited-no-animation node-weight-${currentNode.weight}`) {
+              if (currentNode.weight > 1) {
+                currentNodeElement.className = `node node-weight-${currentNode.weight}`;
+              }
+              else {
               currentNodeElement.className = `node`;
+              }
             }
           }
       }

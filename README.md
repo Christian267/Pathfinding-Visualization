@@ -65,7 +65,7 @@
 </p>
   <h3 align="center">Or Display the Sheer Inefficiency of Depth First Search</h3>
 <p align="center">
-  <img src="https://i.imgur.com/pNRxJ1V.gif" width=550>
+  <img src="https://i.imgur.com/FY8UhZH.gif" width=550>
 </p>
 
 ### Built With

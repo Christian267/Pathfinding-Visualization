@@ -433,8 +433,8 @@ export default class PathFindingVisualizer extends Component {
   }
 
   /**
-   * Used in visualizeNoAlgorithm() to allow dijkstra's algorithm to run with the 
-   * new start and end nodes.
+   * Used in visualizeNoAnimation() to allow the algorithm to run with the 
+   * new start and end nodes and a fresh grid.
    */
   resetNodeProperties(){
     const { grid } = this.state;
@@ -449,7 +449,7 @@ export default class PathFindingVisualizer extends Component {
   
   /**
    * Used in handleMouseEnter(), removes duplicate start/end nodes
-   * that appear when dragging the endpoints to quickly on empty grid.
+   * that appear when dragging the endpoints too quickly on empty grid.
      */
   clearStartAndFinishDuplicates(){
     for (let row = 0; row < NUMROWS; row++) {
@@ -473,7 +473,7 @@ export default class PathFindingVisualizer extends Component {
   }
 
   /**
-   * Used in visualizeAlgorithm dijkstra() with animation and Clear Grid button on the UI.
+   * Used in visualizeAlgorithm() with animation and Clear Grid button on the UI.
    */
   clearGrid() {
     const grid = this.getEmptyGrid();
@@ -527,6 +527,7 @@ export default class PathFindingVisualizer extends Component {
       this.setState({disableButtonsAndGridWhileAnimating: false});
     }, 40 * visitedWallsInOrder.length);
   }
+
   /**
    * Utilized to create unaltered Nodes during the creation of the grid in getEmptyGrid() and
    * during the clearing of the grid in clearGrid().
@@ -550,7 +551,8 @@ export default class PathFindingVisualizer extends Component {
 
   /**
    * Construct a default grid object with unaltered Nodes.
-   * @returns {grid}
+   * @returns {Array.<Array.<Node>>}
+   *  2D array of Nodes representing the grid
    */
   getEmptyGrid = () => {
     const grid = [];

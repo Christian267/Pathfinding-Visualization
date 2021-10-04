@@ -53,13 +53,20 @@
 </p>
   <h3 align="center">Place Walls And Weights To See How They Affect Each Algorithm</h3>
 <p align="center">
-  <img src="https://i.imgur.com/e2wFzxg.gif" width=400>
+  <img src="https://i.imgur.com/e2wFzxg.gif" width=550>
+</p>
+  <h3 align="center">See how different Algorithms Interact with Walls</h3>
+<p align="center">
+  <img src="https://i.imgur.com/xcFEl96.gif" width=550>
 </p>
   <h3 align="center">Update The Grid In Realtime By Dragging The Endpoints</h3>
 <p align="center">
-  <img src="https://i.imgur.com/0DnpTlQ.gif" width=400>
+  <img src="https://i.imgur.com/0DnpTlQ.gif" width=550>
 </p>
-
+  <h3 align="center">Or Display the Sheer Inefficiency of Depth First Search</h3>
+<p align="center">
+  <img src="https://i.imgur.com/a1LXcHV.gif" width=550>
+</p>
 
 ### Built With
 * [React](https://reactjs.org/)

@@ -49,6 +49,7 @@ export default class PathFindingVisualizer extends Component {
 
   componentDidMount() {
     const grid = this.getEmptyGrid();
+    document.title = "Pathfinding Visualizer";
     this.setState((state) => ({
       grid: grid,
     }));

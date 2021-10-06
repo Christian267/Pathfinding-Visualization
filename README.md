@@ -4,10 +4,11 @@
 <p align="center">
   <h3 align="center">Pathfinding Visualization</h3>
   <p align="center">
-    <a href="https://github.com/Christian267/Chess-Web-App"><strong>Explore the docs »</strong></a>
+    <a href="https://christian267.github.io/Pathfinding-Visualization/">https://christian267.github.io/Pathfinding-Visualization/</a>
     <br />
-    <a href="https://github.com/othneildrew/Best-README-Template"></a>
-    <a href="https://github.com/christian267/chess-web-app/issues">Report Bug</a>
+    <a href="https://github.com/Christian267/Pathfinding-Visualization"><strong>Explore the docs »</strong></a>
+    <br />
+    <a href="https://github.com/christian267/Pathfinding-Visualization/issues">Report Bug</a>
   </p>
 </p>
 

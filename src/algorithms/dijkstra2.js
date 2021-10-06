@@ -50,5 +50,4 @@ function getUnvisitedNeighbors(node, grid) {
 function updateNeighbors(neighbor, node) {
     neighbor.distance = node.distance + neighbor.weight;
     neighbor.previousNode = node;
-    
 }

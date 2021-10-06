@@ -42,6 +42,7 @@ export function getNodesInShortestPathOrder(finishNode) {
     }
     return nodesInShortestPath;
 }
+
 function getUnvisitedNeighbors(node, grid) {
     const neighbors = [];
     const { col, row } = node;

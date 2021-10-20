@@ -19,7 +19,7 @@ export default class DropdownMenu extends Component {
     isOpen: false});
   }
 
-  handlerAndMenuText(algorithm) {
+  changeAlgorithmAndMenuText(algorithm) {
     this.changeMenuText(algorithm);
     this.props.handler(algorithm);
   }
@@ -34,7 +34,7 @@ export default class DropdownMenu extends Component {
     var items = this.props.listItems.map((item, index) =>
       <a 
       key={index} 
-      onClick={() => this.handlerAndMenuText(item)}
+      onClick={() => this.changeAlgorithmAndMenuText(item)}
       ref={this.ref}
       href="/#"
       >

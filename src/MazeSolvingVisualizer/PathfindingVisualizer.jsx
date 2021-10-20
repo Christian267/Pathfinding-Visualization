@@ -22,7 +22,7 @@ export default class PathFindingVisualizer extends Component {
       grid: [],
       mouseIsPressed: false,
       disableButtonsAndGridWhileAnimating: false,
-      holdingEndNode: false,
+      // holdingEndNode: false,
       startNode: {
         row: 14,
         col: 19
@@ -39,11 +39,11 @@ export default class PathFindingVisualizer extends Component {
     };
     this.visualizeAlgorithm = this.visualizeAlgorithm.bind(this);
     this.clearGrid = this.clearGrid.bind(this);
-    this.clearVisitedNodes = this.clearVisitedNodes.bind(this);
-    this.saveWallsAndWeights = this.saveWallsAndWeights.bind(this);
-    this.placeWallsAndWeights = this.placeWallsAndWeights.bind(this);
-    this.handleChooseAlgorithm = this.handleChooseAlgorithm.bind(this);
-    this.handleChooseBlockType = this.handleChooseBlockType.bind(this);
+    // this.clearVisitedNodes = this.clearVisitedNodes.bind(this);
+    // this.saveWallsAndWeights = this.saveWallsAndWeights.bind(this);
+    // this.placeWallsAndWeights = this.placeWallsAndWeights.bind(this);
+    this.toggleAlgorithm = this.toggleAlgorithm.bind(this);
+    this.toggleBlockType = this.toggleBlockType.bind(this);
     this.fillGridWithWalls = this.fillGridWithWalls.bind(this);
   }
 
@@ -55,13 +55,13 @@ export default class PathFindingVisualizer extends Component {
     }));
   }
 
-  handleChooseAlgorithm(algorithm) {
+  toggleAlgorithm(algorithm) {
     this.setState({
       algorithm: algorithm,
     });
   }
 
-  handleChooseBlockType(blockType) {
+  toggleBlockType(blockType) {
     this.setState ({
       blockTypeToBePlaced: blockType,
     });
@@ -236,11 +236,11 @@ export default class PathFindingVisualizer extends Component {
     for (let i = 1; i < nodesInShortestPathOrder.length-1; i++) {
       setTimeout(() => {
         const node = nodesInShortestPathOrder[i];
-        const currentNodeElement = document.getElementById(
-          `node-${node.row}-${node.col}`);
-        currentNodeElement.className = node.weight===1
-          ? `node node-shortest-path`
-          : `node node-shortest-path node-weight-${node.weight}`;
+        // const currentNodeElement = document.getElementById(
+        //   `node-${node.row}-${node.col}`);
+        // currentNodeElement.className = node.weight===1
+        //   ? `node node-shortest-path`
+        //   : `node node-shortest-path node-weight-${node.weight}`;
       }, 25 * i);
     }
     setTimeout(() => {
@@ -579,14 +579,14 @@ export default class PathFindingVisualizer extends Component {
           <button onClick={this.clearGrid} disabled={this.state.disableButtonsAndGridWhileAnimating}>Clear Grid</button>
           <DropdownMenu 
             key={1}
-            handler={this.handleChooseAlgorithm} 
+            handler={this.toggleAlgorithm} 
             listItems={algorithmDropdownList} 
             defaultTitle={defaultDropdownTitles[0]}
             extraClassName={"algorithms"}
           />
           <DropdownMenu
             key={2}
-            handler={this.handleChooseBlockType} 
+            handler={this.toggleBlockType} 
             listItems={blockDropdownList} 
             defaultTitle={defaultDropdownTitles[1]}            
             extraClassName={"blocks"}

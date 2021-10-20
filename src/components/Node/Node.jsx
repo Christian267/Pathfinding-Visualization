@@ -5,7 +5,25 @@ import "./Node.css";
 export default class Node extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      col: this.props.col,
+      isFinish: this.props.isFinish,
+      isStart: this.props.isStart,
+      isWall: this.props.isWall,
+      weight: this.props.weight,
+      row: this.props.row,
+    };
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    if(props.isFinish && props.isFinish != state.isFinish || props.isStart || props.isWall || props.weight) {
+      return {
+        isFinish: props.isFinish,
+        isStart: props.isStart,
+        isWall: props.isWall,
+        weight: props.weight
+      }
+    }
   }
 
   render() {
@@ -20,17 +38,17 @@ export default class Node extends Component {
       onMouseUp,
       row,
     } = this.props;
-    const extraClassName = isFinish
+    const extraClassName = this.state.isFinish
       ? "node-finish"
-      : isStart
+      : this.state.isStart
       ? "node-start"
-      : isWall
+      : this.state.isWall
       ? "node-wall"
-      : weight === 4
+      : this.state.weight === 4
       ? "node-weight-4"
-      : weight === 3
+      : this.state.weight === 3
       ? "node-weight-3"
-      : weight === 2
+      : this.state.weight === 2
       ? "node-weight-2"
       : "";
 

@@ -16,7 +16,7 @@ export function breadthFirstSearch(grid, startNode, finishNode){
                 queue.push(neighbor);
             }
         }
-        if (currentNode == finishNode) { 
+        if (currentNode === finishNode) { 
             return visitedNodesInOrder;
         }
     }
